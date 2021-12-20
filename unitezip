@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# A script to merge PDFs from a zip archive into one. Just some dirty automation.
+# Dependencies: bash, ghostscript, pdfunite, unzip
+# By David Penkowoj, 2021/01/08
+
+# Usage: unitezip [input.zip] [output.pdf]
+
+function getfilename {
+  if [ -z "$2" ]; then
+    echo "Portfolio[$1]"
+  else 
+    echo "$2"
+  fi
+}
+
+function error {
+  printf "\033[31m[ Error ] Something's wrong! \033[0m\n" &&
+  exit 1
+}
+
+if [ -e "$1" ]; then
+  exportname="$(getfilename "$@")" &&
+  printf "Set destionation file name %s \n" "$exportname" &&
+
+  unzip -o -d ./.input/ "$1" &&
+  printf "Extracted %s \n" "$1" &&
+
+  pdfunite $(find ./.input/ | grep pdf | sort) "${exportname}_uncompressed.pdf" &&
+  printf "Merged every PDF from %s into %s_uncompressed.pdf \n" "$1" "$exportname" &&
+
+  gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress -dNOPAUSE -dQUIET -dBATCH -sOutputFile="$exportname.pdf" "${exportname}_uncompressed.pdf" &&
+  printf "Compressed file to %s.pdf \n" "$exportname" &&
+
+  rm "${exportname}_uncompressed.pdf" &&
+  printf "Removed uncompressed file \n" &&
+
+  rm -rf ./.input/ &&
+  printf "Removed input dir \n" &&
+
+  printf "Done! \n" ||
+  error
+else
+  error
+fi
+

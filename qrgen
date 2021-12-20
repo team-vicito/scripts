@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# QR-Encode any text or link into an image with a specific size.
+# Dependencies: bash, qrencode
+# By David Penkowoj, 2021/12/20
+
+qrencode "$1" -o "$(echo "$1" | sed "s/\//_/g").png" -s 50 -m 0 --foreground=E5183E
